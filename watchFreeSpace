@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+# USAGE: watchFreeSpace
+#
+# TODO:
+#       * Arguments
+#               * SLEEPTIME
+#               * MOUNTPOINT
+#       * Execute stuff when free space hits a threshold
+#       * Trending to figure out when space will be free
+
+SLEEPTIME=10
+MOUNTPOINT=/home
+
+tcurrentFreetgrn='\e[0;32m' # Green
+tcurrentFreetred='\e[0;31m' # Red
+tcurrentFreetrst='\e[0m'    # TecurrentFreet Reset
+
+lastFree=0
+
+echo "Delay between polls is $SLEEPTIME. We're watching $MOUNTPOINT"
+
+while true; do
+   dfOut=$(df -P $MOUNTPOINT | tail -n1)
+   percentFree=$(echo $dfOut | awk '{print $5}')
+   let currentFree="`echo $dfOut | awk '{print $4}'`/1024"
+   #echo -e "lastFree: $currentFree\tcurrentFree: $lastFree"
+   if [ "$lastFree" -ne "0" ]; then
+      if [ "$lastFree" -eq "$currentFree" ]; then
+            echo -ne "No changes\t\t\t"
+      else
+         if [ "$lastFree" -lt "$currentFree" ]; then
+            let z="currentFree-lastFree"
+            echo -ne "${tcurrentFreetgrn}+ $z MB has been freed${tcurrentFreetrst}\t\t"
+         else
+            let z="lastFree-currentFree"
+            echo -ne "${tcurrentFreetred}- $z MB has been used${tcurrentFreetrst}\t\t"
+         fi
+      fi
+   fi
+   let lastFree=currentFree
+   echo "$currentFree MB free, $percentFree"
+   sleep $SLEEPTIME
+done
+
