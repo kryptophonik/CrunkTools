@@ -1,0 +1,2 @@
+#!/bin/bash
+for x in $(find / -executable -type f -name php); do echo -e "\n[ $x ]\n`$x -v`"; done | less

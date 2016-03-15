@@ -1,0 +1,108 @@
+#!/bin/bash
+
+if [ "$#" = 0 ] 
+then
+   echo
+   echo "Usage: $0 [-v] HOSTNAME STRINGFRAGMENT"
+   echo "snmpBrute: A tool to do a small \"brute force\" to find an SNMP query string."
+   echo
+   echo "  -v     print used (and failed) string."
+   echo
+   echo "The STRINGFRAGMENT can be an number of strings you think the SNMP query"
+   echo "string may be or contain."
+   echo
+   exit
+fi 
+
+if [ $1 = "-v" ]
+then
+   verbose=1
+   ipaddress=$2
+else
+   ipaddress=$1
+fi
+
+function UsedString {
+   if [ "$verbose" = 1 ]
+   then
+      echo "TRIED: $1"
+   fi
+}
+
+
+function WalkThis {
+        snmpwalk -v2c -r1 -c $2 $ipaddress &> /dev/null
+   return $?
+        }
+
+function ToUpper() {
+        echo $1 | tr '[a-z]' '[A-Z]'
+        }
+
+
+function ToLower() {
+        echo $1 | tr '[A-Z]' '[a-z]'
+        }
+
+# Populate variable $key with all passed arguments, including ip
+for arg in "$@";
+do
+   key[$[${#key[@]}+1]]=$arg
+done
+
+# Add "lol" and "snmp" to this list ($key). This is an example of default fragments that can be added.
+key[$[${#key[@]}+1]]="lol"
+key[$[${#key[@]}+1]]="snmp"
+
+# This is used to pupulate the array in the next bit starting with the correct argumemnt
+if [ "$verbose" = 1 ]
+then
+   items=3
+else
+   items=2
+fi
+
+
+# Take arguments (excluding IP address/hostname) and populate array with upper and lowercase
+for ((item=items; item<=${#key[@]}; item++));
+do
+   firstpart[$[${#firstpart[@]}+1]]=$(ToUpper ${key[${item}]})
+   firstpart[$[${#firstpart[@]}+1]]=$(ToLower ${key[${item}]})
+done
+
+# All of these will be added to the end of the string
+secondpart=("public" "PUBLIC" "snmp" "SNMP")
+for first in ${firstpart[@]} 
+do
+   if ($(WalkThis $1 $first));
+   then
+      echo "$first is the correct community string."
+      exit
+   fi
+   UsedString $first 
+
+   for second in ${secondpart[@]}
+   do
+      community=${first}$second  
+      if ($(WalkThis $1 $community));
+      then
+         echo "$community is the correct community string."
+         exit
+      fi
+      UsedString $community
+   done
+done
+
+for second in ${secondpart[@]}
+        do
+                if ($(WalkThis $1 $second));
+      then
+         echo "$second is the correct community string."
+         exit
+      fi
+      UsedString $second
+        done
+
+echo "Was not able to find a suitable SNMP community string password."
+exit 1
+
