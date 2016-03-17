@@ -1,4 +1,10 @@
-# CrunkTools
+     _________                      __   ___________           .__          
+    \_   ___ \_______ __ __  ____ |  | _\__    ___/___   ____ |  |   ______
+    /    \  \/\_  __ \  |  \/    \|  |/ / |    | /  _ \ /  _ \|  |  /  ___/
+    \     \____|  | \/  |  /   |  \    <  |    |(  <_> |  <_> )  |__\___ \ 
+     \______  /|__|  |____/|___|  /__|_ \ |____| \____/ \____/|____/____  >
+            \/                  \/     \/                               \/ 
+
 A bunch of useful Linux scripts. I have quite a few more that I'll be adding after I do a little cleanup of the code. These are scripts that could be useful in a server environment.
 
    * watchFreeSpace
